@@ -299,6 +299,8 @@ end
         pop!(need_to_handle_undef_sparam, which(Base.convert, (Type{Union{T, Nothing}} where T, Some)))
         pop!(need_to_handle_undef_sparam, which(Base.convert, Tuple{Type{Tuple{Vararg{Int}}}, Tuple{}}))
         pop!(need_to_handle_undef_sparam, which(Base.convert, Tuple{Type{Tuple{Vararg{Int}}}, Tuple{Int8}}))
+        pop!(need_to_handle_undef_sparam, which(Base.reshape, Tuple{Array{Union{Missing, T}, N}, Dims{N}} where T where N))
+        pop!(need_to_handle_undef_sparam, which(Base.reshape, Tuple{Array{Union{Missing, T}, M} where M, Dims{N}} where T where N))
         @test need_to_handle_undef_sparam == Set()
     end
 end

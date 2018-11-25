@@ -145,6 +145,29 @@ function float(A::AbstractArray{Union{T, Missing}}) where {T}
 end
 float(A::AbstractArray{Missing}) = A
 
+function reshape(a::Array{Union{T, Missing}, N}, dims::NTuple{N, Int}) where {T, N}
+    if prod(dims) != length(a)
+        _throw_dmrsa(dims, length(a))
+    end
+    # If Missing <: T, Union{T, Missing} === T and this really should have been a call to reshape(::Array{T, N}, ::Dims{N})
+    # (this currently catches Array{Any})
+    if Missing <: T
+        if dims == size(a)
+            return a
+        end
+        return ccall(:jl_reshape_array, Array{T, N}, (Any, Any, Any), Array{T, N}, a, dims)
+    end
+    return ReshapedArray(a, dims, ())
+end
+
+function reshape(a::Array{Union{T, Missing}}, dims::NTuple{N, Int}) where {T, N}
+    if prod(dims) != length(a)
+        _throw_dmrsa(dims, length(a))
+    end
+    Missing <: T && return ccall(:jl_reshape_array, Array{T, N}, (Any, Any, Any), Array{T, N}, a, dims)
+    return ReshapedArray(a, dims, ())
+end
+
 """
     skipmissing(itr)
 
